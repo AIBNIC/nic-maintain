@@ -9,6 +9,8 @@ import (
 )
 
 func Info_to_list() [][]string {
+	// 尝试打开文件，如果打不开则创建文件
+	// 判断文件是否存在，不存在则创建
 	_, err := os.Stat("Econnect_box")
 	if err != nil && os.IsNotExist(err) {
 		fmt.Println("Econnect_box文件夹创建中...")
@@ -18,11 +20,14 @@ func Info_to_list() [][]string {
 	f, err := os.Open("Econnect_box/switch_info.csv")
 	if err != nil {
 		fmt.Println("switch_info.csv文件缺失，正在创建.....")
-		err := os.WriteFile("Econnect_box/switch_info.csv", []byte("IP地址,用户名,密码,enable密码,第一行请勿更改！"), os.ModePerm)
+		err := os.WriteFile(
+			"Econnect_box/switch_info.csv",
+			[]byte("IP地址,用户名,密码,enable密码,第一行请勿更改！"),
+			os.ModePerm,
+		)
 		if err == nil {
 			fmt.Println("创建成功！请添加完信息后重新打开")
 		}
-		os.Exit(1)
 	}
 
 	reader := csv.NewReader(f)
@@ -30,8 +35,9 @@ func Info_to_list() [][]string {
 
 	if err != nil || len(switch_list) <= 1 {
 		fmt.Println("你貌似还没输入信息，请添加信息后重新打开,例如：")
-		fmt.Println("IP地址   用户名 密码 enable密码\n10.1.1.1 test test test\n10.1.1.2 test test test")
-		os.Exit(1)
+		fmt.Println("IP地址   用户名 密码 enable密码")
+		fmt.Println("10.1.1.1 test test test")
+		fmt.Println("10.1.1.2 test test test")
 	}
 
 	return switch_list
@@ -50,12 +56,14 @@ func Choice_list(switch_list [][]string) [][]string {
 
 	for {
 		var Switch_list_choice_num string
-		fmt.Scanf("%s", &Switch_list_choice_num)
+		fmt.Scan(&Switch_list_choice_num)
 
 		choice_num := strings.Split(Switch_list_choice_num, "-")
 		start_num, err := strconv.Atoi(choice_num[0])
 		if err != nil {
-			fmt.Println("输入有误！请重新输入正确的格式：1 或 1-5")
+			if choice_num[0] != "" {
+				fmt.Println("输入有误！请重新输入正确的格式：1 或 1-5")
+			}
 		} else {
 			if start_num == 0 {
 				fmt.Println("不在范围内！请重新输入")
@@ -63,21 +71,19 @@ func Choice_list(switch_list [][]string) [][]string {
 				if len(choice_num) == 1 {
 					if start_num >= len(switch_list) {
 						fmt.Println("超过指定范围")
+					} else {
+						switch_list = switch_list[start_num : start_num+1]
+						break
 					}
-
-					switch_list = switch_list[start_num : start_num+1]
-
-					break
 				} else {
 					if len(choice_num) == 2 {
 						end_num, err := strconv.Atoi(choice_num[1])
 						if end_num >= len(switch_list) || err != nil {
 							fmt.Println("超过指定范围")
+						} else {
+							switch_list = switch_list[start_num : end_num+1]
+							break
 						}
-
-						switch_list = switch_list[start_num : end_num+1]
-
-						break
 					} else {
 						println("输入有误！请重新输入")
 					}

@@ -28,12 +28,14 @@ func Econ_connect(ip, user, pwd, secret string) *network.Driver {
 	)
 
 	if err != nil {
-		log.Fatalf("failed to create platform; error: %+v", err)
+		log.Printf("failed to create platform; error: %+v", err)
+		return nil
 	}
 
 	d, err := p.GetNetworkDriver()
 	if err != nil {
-		log.Fatalf("failed to fetch network driver from the platform; error: %+v", err)
+		log.Printf("failed to fetch network driver from the platform; error: %+v", err)
+		return nil
 	}
 
 	err = d.Open()
@@ -43,7 +45,6 @@ func Econ_connect(ip, user, pwd, secret string) *network.Driver {
 	}
 
 	fmt.Printf("已连接 %s ...\n", ip)
-
 	return d
 }
 
@@ -84,13 +85,16 @@ func Econ_inspection(d *network.Driver) []any {
 		log.Fatalf("failed to get prompt; error: %+v", err)
 	}
 
+	reg_prompt := regexp.MustCompile(`\n(\w.*)#`)
+	output_prompt := reg_prompt.FindStringSubmatch(string(prompt))
+
 	cpu_5s, _ := strconv.ParseFloat(output_cpu[0][1], 32)
 	cpu_1m, _ := strconv.ParseFloat(output_cpu[1][1], 32)
 	cpu_5m, _ := strconv.ParseFloat(output_cpu[2][1], 32)
 	mem, _ := strconv.ParseFloat(output_memory[1], 32)
 
 	return []any{
-		string(prompt),
+		output_prompt[1],
 		cpu_5s, cpu_1m, cpu_5m,
 		mem,
 	}

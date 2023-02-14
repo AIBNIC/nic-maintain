@@ -6,17 +6,19 @@ import (
 )
 
 func main() {
+	// 读取数据
 	Switch_list := core.Info_to_list()
-	var run_num int
 
+	// 阈值，超出下值则写入摘要
 	Threshold_cpu := 30
 	Threshold_memory := 70
 
+	var run_num int = 0
 	for {
-		fmt.Println("请输入要执行的数字  1.巡检 2.备份 3.退出：")
-		fmt.Scanf("%d", &run_num)
-
-		if run_num == 1 {
+		if run_num == 0 {
+			fmt.Println("请输入要执行的数字  1.巡检 2.备份 3.退出：")
+			fmt.Scan(&run_num)
+		} else if run_num == 1 {
 			var Econ_inspection_box [][]any
 			Switch_list_choice := core.Choice_list(Switch_list)
 			for _, i := range Switch_list_choice {
@@ -35,6 +37,7 @@ func main() {
 			}
 
 			core.Turn_xlsx(Econ_inspection_box, Threshold_cpu, Threshold_memory)
+			run_num = 0
 		} else if run_num == 2 {
 			Switch_list_choice := core.Choice_list(Switch_list)
 			tftp_ip := core.Tftp_server()
@@ -54,10 +57,12 @@ func main() {
 
 			core.Stop_tftp_process()
 			fmt.Printf("关闭成功！本次失败备份%d个\n", error_time)
+			run_num = 0
 		} else if run_num == 3 {
 			break
 		} else {
 			fmt.Println("输入有误！请重新输入")
+			run_num = 0
 		}
 	}
 }
