@@ -84,10 +84,10 @@ func Econ_inspection(d *network.Driver) []any {
 		log.Fatalf("failed to get prompt; error: %+v", err)
 	}
 
-	cpu_5s, _ := strconv.Atoi(output_cpu[0][1])
-	cpu_1m, _ := strconv.Atoi(output_cpu[1][1])
-	cpu_5m, _ := strconv.Atoi(output_cpu[2][1])
-	mem, _ := strconv.Atoi(output_memory[1])
+	cpu_5s, _ := strconv.ParseFloat(output_cpu[0][1], 32)
+	cpu_1m, _ := strconv.ParseFloat(output_cpu[1][1], 32)
+	cpu_5m, _ := strconv.ParseFloat(output_cpu[2][1], 32)
+	mem, _ := strconv.ParseFloat(output_memory[1], 32)
 
 	return []any{
 		string(prompt),

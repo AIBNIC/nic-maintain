@@ -20,20 +20,20 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 			data_list[i][5] = "连接失败"
 			data_list[i] = append(data_list[i], "连接失败,请检查网络配置！")
 		} else {
-			cpu_5s := data_list[i][2].(int)
-			cpu_1m := data_list[i][3].(int)
-			cpu_5m := data_list[i][4].(int)
-			mem := data_list[i][5].(int)
-			if cpu_5s >= Threshold_cpu {
+			cpu_5s := data_list[i][2].(float64)
+			cpu_1m := data_list[i][3].(float64)
+			cpu_5m := data_list[i][4].(float64)
+			mem := data_list[i][5].(float64)
+			if cpu_5s >= float64(Threshold_cpu) {
 				total += "cpu超出偏高 "
 			} else {
-				if cpu_1m >= Threshold_cpu {
+				if cpu_1m >= float64(Threshold_cpu) {
 					total += "cpu超出偏高 "
 				} else {
-					if cpu_5m >= Threshold_cpu {
+					if cpu_5m >= float64(Threshold_cpu) {
 						total += "cpu超出偏高 "
 					} else {
-						if mem >= Threshold_memory {
+						if mem >= float64(Threshold_memory) {
 							total += "内存偏高 "
 						}
 
