@@ -95,3 +95,27 @@ func Econ_inspection(d *network.Driver) []any {
 		mem,
 	}
 }
+
+func Econ_backup(d *network.Driver, tftp_ip string) {
+	prompt, err := d.Channel.GetPrompt()
+	if err != nil {
+		log.Fatalf("failed to get prompt; error: %+v", err)
+	}
+
+	reg_prompt := regexp.MustCompile(`\n(\w.*)#`)
+	output_prompt := reg_prompt.FindStringSubmatch(string(prompt))
+
+	fmt.Printf("正在备份到 %s.text\n", output_prompt[1])
+
+	r, err := d.SendCommands([]string{
+		"write", // 提前保存一遍再备份
+		"copy flash:config.text tftp://" + tftp_ip + "/" + output_prompt[1] + ".text",
+	})
+	if err != nil {
+		log.Fatalf("unable to run command: %v", err)
+	}
+
+	for _, r := range r.Responses {
+		fmt.Println(r.Result)
+	}
+}

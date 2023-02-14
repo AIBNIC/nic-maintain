@@ -36,7 +36,24 @@ func main() {
 
 			core.Turn_xlsx(Econ_inspection_box, Threshold_cpu, Threshold_memory)
 		} else if run_num == 2 {
-			// TODO
+			Switch_list_choice := core.Choice_list(Switch_list)
+			tftp_ip := core.Tftp_server()
+
+			// 失败次数
+			var error_time int = 0
+
+			for _, i := range Switch_list_choice {
+				device := core.Econ_connect(i[0], i[1], i[2], i[3])
+				if device == nil {
+					error_time += 1
+				} else {
+					core.Econ_backup(device, tftp_ip)
+					defer device.Close()
+				}
+			}
+
+			core.Stop_tftp_process()
+			fmt.Printf("关闭成功！本次失败备份%d个\n", error_time)
 		} else if run_num == 3 {
 			break
 		} else {
