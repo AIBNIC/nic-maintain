@@ -80,13 +80,13 @@ func Econ_inspection(d *network.Driver) []any {
 		}
 	}
 
-	prompt, err := d.Channel.GetPrompt()
+	prompt, err := d.GetPrompt()
 	if err != nil {
 		log.Fatalf("failed to get prompt; error: %+v", err)
 	}
 
-	reg_prompt := regexp.MustCompile(`\n(\w.*)#`)
-	output_prompt := reg_prompt.FindStringSubmatch(string(prompt))
+	reg_prompt := regexp.MustCompile(`(?im)^([\w.\-@/:]{1,63})#$`)
+	output_prompt := reg_prompt.FindStringSubmatch(prompt)
 
 	cpu_5s, _ := strconv.ParseFloat(output_cpu[0][1], 32)
 	cpu_1m, _ := strconv.ParseFloat(output_cpu[1][1], 32)
@@ -101,13 +101,13 @@ func Econ_inspection(d *network.Driver) []any {
 }
 
 func Econ_backup(d *network.Driver, tftp_ip string) {
-	prompt, err := d.Channel.GetPrompt()
+	prompt, err := d.GetPrompt()
 	if err != nil {
 		log.Fatalf("failed to get prompt; error: %+v", err)
 	}
 
-	reg_prompt := regexp.MustCompile(`\n(\w.*)#`)
-	output_prompt := reg_prompt.FindStringSubmatch(string(prompt))
+	reg_prompt := regexp.MustCompile(`(?im)^([\w.\-@/:]{1,63})#$`)
+	output_prompt := reg_prompt.FindStringSubmatch(prompt)
 
 	fmt.Printf("正在备份到 %s.text\n", output_prompt[1])
 
