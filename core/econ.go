@@ -11,6 +11,22 @@ import (
 	"github.com/scrapli/scrapligo/platform"
 )
 
+func customOnOpen(d *network.Driver) error {
+	_, err := d.SendCommand("terminal length 0")
+	if err != nil {
+		return err
+	}
+
+	// Ruijie devices
+	// See: https://github.com/scrapli/scrapligo/issues/113#issuecomment-1367100153
+	_, err = d.SendCommand("terminal width 256")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func Econ_connect(ip, user, pwd, secret string) *network.Driver {
 	fmt.Printf("开始连接 %s ...\n", ip)
 
@@ -25,6 +41,7 @@ func Econ_connect(ip, user, pwd, secret string) *network.Driver {
 		options.WithTransportType("standard"),
 		options.WithStandardTransportExtraKexs([]string{"diffie-hellman-group1-sha1"}),
 		options.WithStandardTransportExtraCiphers([]string{"3des-cbc"}),
+		options.WithNetworkOnOpen(customOnOpen),
 	)
 
 	if err != nil {
