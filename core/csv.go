@@ -48,7 +48,13 @@ func Choice_list(switch_list [][]string) [][]string {
 
 	for i, sw := range switch_list {
 		if i != 0 {
-			fmt.Printf("%d | %s | %s | %s\n", i, sw[0], sw[1], sw[2])
+			fmt.Printf(
+				"%d | %s | %s | %s\n",
+				i,
+				sw[0],
+				sw[1][:3]+strings.Join(make([]string, len([]rune(sw[1][3:]))+1), "*"),
+				sw[2][:3]+strings.Join(make([]string, len([]rune(sw[2][3:]))+1), "*"),
+			)
 		}
 	}
 
