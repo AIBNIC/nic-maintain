@@ -71,11 +71,10 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 			fmt.Println(err)
 		}
 	}()
-	index, _ := f.NewSheet("巡检表")
 
 	for idx, row := range data_list {
 		cell, _ := excelize.CoordinatesToCellName(1, idx+1)
-		f.SetSheetRow("巡检表", cell, &row)
+		f.SetSheetRow("Sheet1", cell, &row)
 	}
 
 	styleHeader, _ := f.NewStyle(&excelize.Style{
@@ -88,9 +87,9 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 			Color: "#ffffff",
 		},
 	})
-	f.SetCellStyle("巡检表", "A1", "G1", styleHeader)
+	f.SetCellStyle("Sheet1", "A1", "G1", styleHeader)
 
-	f.SetConditionalFormat("巡检表", "C2:F"+fmt.Sprint(len(data_list)),
+	f.SetConditionalFormat("Sheet1", "C2:F"+fmt.Sprint(len(data_list)),
 		[]excelize.ConditionalFormatOptions{
 			{
 				Type:     "data_bar",
@@ -102,11 +101,14 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 		},
 	)
 
-	f.SetColWidth("巡检表", "A", "A", 12)
-	f.SetColWidth("巡检表", "B", "B", 18)
-	f.SetColWidth("巡检表", "G", "G", 35)
+	f.SetColWidth("Sheet1", "A", "A", 12)
+	f.SetColWidth("Sheet1", "B", "B", 18)
+	f.SetColWidth("Sheet1", "G", "G", 35)
 
-	f.SetActiveSheet(index)
+	if err := f.SetSheetName("Sheet1", "巡检表"); err != nil {
+		fmt.Println(err)
+	}
+
 	if err := f.SaveAs(folor + xlsx_name); err != nil {
 		fmt.Println(err, "文件被占用，请关闭后重试！")
 	}
