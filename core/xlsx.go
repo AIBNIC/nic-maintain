@@ -73,11 +73,19 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 	}()
 
 	for idx, row := range data_list {
-		cell, _ := excelize.CoordinatesToCellName(1, idx+1)
-		f.SetSheetRow("Sheet1", cell, &row)
+		cell, err := excelize.CoordinatesToCellName(1, idx+1)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if err := f.SetSheetRow("Sheet1", cell, &row); err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 
-	styleHeader, _ := f.NewStyle(&excelize.Style{
+	styleHeader, err := f.NewStyle(&excelize.Style{
 		Fill: excelize.Fill{
 			Type:    "pattern",
 			Pattern: 1,
@@ -87,29 +95,50 @@ func Turn_xlsx(data_list [][]any, Threshold_cpu, Threshold_memory int) {
 			Color: "#ffffff",
 		},
 	})
-	f.SetCellStyle("Sheet1", "A1", "G1", styleHeader)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	f.SetConditionalFormat("Sheet1", "C2:F"+fmt.Sprint(len(data_list)),
-		[]excelize.ConditionalFormatOptions{
-			{
-				Type:     "data_bar",
-				BarColor: "#92d050",
-				Criteria: "=",
-				MinType:  "min",
-				MaxType:  "max",
-			},
+	if err := f.SetCellStyle("Sheet1", "A1", "G1", styleHeader); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	opts := []excelize.ConditionalFormatOptions{
+		{
+			Type:     "data_bar",
+			BarColor: "#92d050",
+			Criteria: "=",
+			MinType:  "min",
+			MaxType:  "max",
 		},
-	)
+	}
+	if err := f.SetConditionalFormat("Sheet1", "C2:F"+fmt.Sprint(len(data_list)), opts); err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	f.SetColWidth("Sheet1", "A", "A", 12)
-	f.SetColWidth("Sheet1", "B", "B", 18)
-	f.SetColWidth("Sheet1", "G", "G", 35)
+	if err := f.SetColWidth("Sheet1", "A", "A", 12); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if err := f.SetColWidth("Sheet1", "B", "B", 18); err != nil {
+		fmt.Println(err)
+		return
+	}
+	if err := f.SetColWidth("Sheet1", "G", "G", 35); err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	if err := f.SetSheetName("Sheet1", "巡检表"); err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	if err := f.SaveAs(folor + xlsx_name); err != nil {
 		fmt.Println(err, "文件被占用，请关闭后重试！")
+		return
 	}
 }

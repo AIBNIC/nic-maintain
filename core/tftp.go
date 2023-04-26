@@ -45,8 +45,8 @@ func writeHandler(filename string, wt io.WriterTo) error {
 	return nil
 }
 
-func Start_tftp_process(tftp_ip_addr, tftp_folder string) {
-	tftpFolder = tftp_folder
+func Start_tftp_process() {
+	fmt.Println("请允许防火墙通过，否则将不能使用备份功能")
 
 	s = tftp.NewServer(readHandler, writeHandler)
 
@@ -56,12 +56,9 @@ func Start_tftp_process(tftp_ip_addr, tftp_folder string) {
 			fmt.Printf("tftp server: %v\n错误！69端口被占用\n", err)
 		}
 	}()
-
-	fmt.Printf("正在监听 %s:69\n", tftp_ip_addr)
 }
 
 func Stop_tftp_process() {
-	fmt.Println("正在关闭tftp服务器....")
 	s.Shutdown()
 }
 
@@ -85,18 +82,14 @@ func get_host_ip() (string, error) {
 	return "", err
 }
 
-func Tftp_server() string {
+func Tftp_server() (string, error) {
 	time_folor := time.Now().Format("2006010215")
-	folor := "./Econnect_box/" + time_folor + "/"
+	tftpFolder = "./Econnect_box/" + time_folor + "/"
 
-	_, err := os.Stat(folor)
+	_, err := os.Stat(tftpFolder)
 	if err != nil && os.IsNotExist(err) {
-		os.Mkdir(folor, os.ModePerm)
+		os.Mkdir(tftpFolder, os.ModePerm)
 	}
 
-	tftp_ip, _ := get_host_ip()
-	fmt.Println("请允许防火墙通过，否则将不能使用备份功能")
-	Start_tftp_process(tftp_ip, folor)
-
-	return tftp_ip
+	return get_host_ip()
 }

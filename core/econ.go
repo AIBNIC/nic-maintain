@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"log"
+	"math"
 	"regexp"
 	"strconv"
 
@@ -28,8 +29,6 @@ func customOnOpen(d *network.Driver) error {
 }
 
 func Econ_connect(ip, user, pwd, secret string) *network.Driver {
-	fmt.Printf("开始连接 %s ...\n", ip)
-
 	p, err := platform.NewPlatform(
 		"cisco_iosxe",
 		ip,
@@ -57,17 +56,15 @@ func Econ_connect(ip, user, pwd, secret string) *network.Driver {
 
 	err = d.Open()
 	if err != nil {
-		fmt.Printf("%+v\n由于连接 %s 失败，正在跳转到下一台设备中\n", err, ip)
+		fmt.Printf("\n连接 %s 失败\n%+v\n", ip, err)
 		return nil
 	}
 
-	fmt.Printf("已连接 %s ...\n", ip)
+	fmt.Printf("\n已连接到 %s\n", ip)
 	return d
 }
 
 func Econ_inspection(d *network.Driver) []any {
-	fmt.Println("开始巡检...")
-
 	r, err := d.SendCommands([]string{
 		"show memory",
 		"show cpu",
@@ -105,16 +102,29 @@ func Econ_inspection(d *network.Driver) []any {
 	reg_prompt := regexp.MustCompile(`(?im)^([\w.\-@/:]{1,63})#$`)
 	output_prompt := reg_prompt.FindStringSubmatch(prompt)
 
-	cpu_5s, _ := strconv.ParseFloat(output_cpu[0][1], 32)
-	cpu_1m, _ := strconv.ParseFloat(output_cpu[1][1], 32)
-	cpu_5m, _ := strconv.ParseFloat(output_cpu[2][1], 32)
-	mem, _ := strconv.ParseFloat(output_memory[1], 32)
-
-	return []any{
-		output_prompt[1],
-		cpu_5s, cpu_1m, cpu_5m,
-		mem,
+	var res []any
+	if cpu_5s, err := strconv.ParseFloat(output_cpu[0][1], 32); err != nil {
+		res = append(res, math.NaN())
+	} else {
+		res = append(res, cpu_5s)
 	}
+	if cpu_1m, err := strconv.ParseFloat(output_cpu[1][1], 32); err != nil {
+		res = append(res, math.NaN())
+	} else {
+		res = append(res, cpu_1m)
+	}
+	if cpu_5m, err := strconv.ParseFloat(output_cpu[2][1], 32); err != nil {
+		res = append(res, math.NaN())
+	} else {
+		res = append(res, cpu_5m)
+	}
+	if mem, err := strconv.ParseFloat(output_memory[1], 32); err != nil {
+		res = append(res, math.NaN())
+	} else {
+		res = append(res, mem)
+	}
+
+	return append([]any{output_prompt[1]}, res...)
 }
 
 func Econ_backup(d *network.Driver, tftp_ip string) {
@@ -126,7 +136,7 @@ func Econ_backup(d *network.Driver, tftp_ip string) {
 	reg_prompt := regexp.MustCompile(`(?im)^([\w.\-@/:]{1,63})#$`)
 	output_prompt := reg_prompt.FindStringSubmatch(prompt)
 
-	fmt.Printf("正在备份到 %s.text\n", output_prompt[1])
+	fmt.Printf("另存为 %s.text\n", output_prompt[1])
 
 	r, err := d.SendCommands([]string{
 		"write", // 提前保存一遍再备份

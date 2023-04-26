@@ -40,23 +40,29 @@ func main() {
 			run_num = 0
 		} else if run_num == 2 {
 			Switch_list_choice := core.Choice_list(Switch_list)
-			tftp_ip := core.Tftp_server()
+			tftp_ip, err := core.Tftp_server()
+			if err != nil {
+				fmt.Println("错误：无法获取本机 IP")
+			} else {
+				core.Start_tftp_process()
 
-			// 失败次数
-			var error_time int = 0
+				// 失败次数
+				var error_time int = 0
 
-			for _, i := range Switch_list_choice {
-				device := core.Econ_connect(i[0], i[1], i[2], i[3])
-				if device == nil {
-					error_time += 1
-				} else {
-					core.Econ_backup(device, tftp_ip)
-					defer device.Close()
+				for _, i := range Switch_list_choice {
+					device := core.Econ_connect(i[0], i[1], i[2], i[3])
+					if device == nil {
+						error_time += 1
+					} else {
+						core.Econ_backup(device, tftp_ip)
+						defer device.Close()
+					}
 				}
+
+				core.Stop_tftp_process()
+				fmt.Printf("\n尝试连接交换机，失败 %d 个\n", error_time)
 			}
 
-			core.Stop_tftp_process()
-			fmt.Printf("关闭成功！本次失败备份%d个\n", error_time)
 			run_num = 0
 		} else if run_num == 3 {
 			break
